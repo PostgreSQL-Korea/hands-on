@@ -1,0 +1,33 @@
+# cd /
+# mkdir postgres data pg_wal archive
+# cd postgres
+# tar xzf ../pg11.tar.gz
+# ls
+# useradd postgres
+# cd /
+# chown postgres.postgres data pg_wal archive
+# chmod 700 data pg_wal archive
+# su - postgres
+$ echo "export PATH=/postgres/11/bin:\$PATH" >> .bash_profile
+$ exit
+# su - postgres
+$ echo $PATH
+$ date
+$ locale
+$ initdb --help
+$ initdb -D /data/pg11 --lc-collate=C -k -X /pg_wal/pg11 --wal-segsize=1024 -N
+$ echo "export PGDATA=/data/pg11" >> ~/.bash_profile
+$ exit
+# su - postgres
+$ echo $PGDATA
+$ cd $PGDATA
+$ diff postgresql.conf /pg_hands_on/postgresql.conf
+$ cp /pg_hands_on/postgresql.conf .
+$ diff pg_hba.conf /pg_hands_on/pg_hba.conf
+$ cp /pg_hands_on/pg_hba.conf .
+$ chmod 600 postgresql.conf pg_hba.conf
+$ pg_ctl start
+$ ps x
+$ cd $PGDATA/log && ls
+$ psql
+postgres=# \q
