@@ -26,8 +26,7 @@ test=# \d addrcode
 test=# alter table addrcode add primary key (acode);
 test=# \d addrcode
 test=# create table places (placeid text primary key, acode text not null, addrmisc text not null);
-test=# insert into places select 고유번호 as placeid,법정동코드 as acode ,case when 특수지구분명 = '산 ' then 특수지구분명 else '' end || 지번 as addrmisc from 공시지가 group by 고유번호,법정동코드
-, 특수지구분명,지번;
+test=# insert into places select 고유번호 as placeid,법정동코드 as acode ,case when 특수지구분명 = '산 ' then 특수지구분명 else '' end || 지번 as addrmisc from 공시지가 group by 고유번호,법정동코드, 특수지구분명,지번;
 test=# \i /pg_hands_on/re.sql
 test=# \dt
 test=# alter table landprice add foreign key (placeid) references places (placeid);
