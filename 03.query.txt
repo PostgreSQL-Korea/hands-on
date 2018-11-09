@@ -31,3 +31,19 @@ test=# \i /pg_hands_on/re.sql
 test=# \dt
 test=# alter table landprice add foreign key (placeid) references places (placeid);
 test=# alter table places add foreign key ...
+test=# alter table addrcode add foreign key ...
+test=# insert into addrcode values ('','','');
+test=# create view vaddrcode as with recursive t as (
+select acode,aname, 0 as level from addrcode where acode <> '' and upcode = ''
+union all
+select a.acode,t.aname || ' ' || a.aname, t.level + 1 from addrcode a, t where a.upcode = t.acode
+) select * from t where level = 2;
+test=# create view vplaces as select a.placeid, b.aname || ' ' || a.addrmisc as address 
+from places a join vaddrcode b on (a.acode = b.acode);
+test=# select * from vplaces where placeid = '1111013700101550000';
+test=# select b.address, year, month, price from landprice a join vplaces b on a.placeid = b.placeid where a.placeid = '1111013700101550000';
+test=# select b.address, year, month, price from landprice a join vplaces b on a.placeid = b.placeid where a.placeid = '1111013700101550000' order by year, month;
+test=# select * from landprice order by price desc limit 1;
+test=# select b.address, year, month, price from landprice a join vplaces b on a.placeid = b.placeid where a.placeid = '1114012400100240002' order by year, month;
+test=# select b.address, year, month, price, first_value(price) over (order by year,month) from landprice a join vplaces b on a.placeid = b.placeid where a.placeid = '1114012400100240002' order by year, month;
+test=# select b.address, year, month, price, round(price * 1.0 / (first_value(price) over (order by year,month)) * 100, 0) as incr from landprice a join vplaces b on a.placeid = b.placeid where a.placeid = '1114012400100240002' order by year, month;
