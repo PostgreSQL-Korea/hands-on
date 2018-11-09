@@ -32,6 +32,6 @@ $ cd $PGDATA/log && ls
 $ psql
 postgres=# \q
 $ exit
-# firewall-cmd --permanent --zone=dmz --add-service=postgresql
+# firewall-cmd --permanent --zone=public --add-service=postgresql
 # firewall-cmd --reload
-# firewall-cmd --list-services --zone=dmz
+# firewall-cmd --list-services --zone=public
