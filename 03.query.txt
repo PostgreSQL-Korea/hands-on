@@ -1,0 +1,34 @@
+# su - postgres
+$ pg_ctl start
+$ psql --help
+$ psql -l
+$ dropdb test
+$ createdb test
+$ psql -l
+$ psql test
+$ locale
+$ date
+$ ls -l /pg_hands_on/AL_11_D151_20180910.csv
+$ wc -l /pg_hands_on/AL_11_D151_20180910.csv
+$ head /pg_hands_on/AL_11_D151_20180910.csv
+$ head /pg_hands_on/AL_11_D151_20180910.csv | iconv -f cp949 -t utf8
+$ psql test
+test=# \?
+test=# \timing
+test=# \! cat /pg_hands_on/03.query01.sql
+test=# \i /pg_hands_on/03.query01.sql
+test=# \h copy
+test=# \copy 공시지가 from '/pg_hands_on/AL_11_D151_20180910.csv' (format csv, header, encoding 'uhc')
+test=# \dt+
+test=# \d 공시지가
+test=# create table addrcode as select 법정동코드 as acode,법정동명 as aname from 공시지가 group by 법정동코드,법정동명;
+test=# \d addrcode
+test=# alter table addrcode add primary key (acode);
+test=# \d addrcode
+test=# create table places (placeid text primary key, acode text not null, addrmisc text not null);
+test=# insert into places select 고유번호 as placeid,법정동코드 as acode ,case when 특수지구분명 = '산 ' then 특수지구분명 else '' end || 지번 as addrmisc from 공시지가 group by 고유번호,법정동코드
+, 특수지구분명,지번;
+test=# \i /pg_hands_on/re.sql
+test=# \dt
+test=# alter table landprice add foreign key (placeid) references places (placeid);
+test=# alter table places add foreign key ...
