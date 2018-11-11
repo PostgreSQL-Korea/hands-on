@@ -38,4 +38,36 @@ WHERE relkind IN ('r',
   AND relpages > 0
   AND int4((a.relpages * 8192) / (ceil((b.n_live_tup * c.stawidth) * 1.0 / 8192) * 8192)) > 1
 ORDER BY 2;
-test=# 
+test=# SELECT a.oid::regclass,
+       a.relpages * 8192 AS relsize,
+       ceil(b.keywidth * 1.0 * c.n_live_tup / 7373) * 8192 + 8192 AS actualsize,
+       round((a.relpages * 8192 * 1.0) / (ceil(b.keywidth * 1.0 * c.n_live_tup / 7373) * 8192 + 8192), 0) AS bloatratio
+FROM pg_class a,
+  (SELECT a.indexrelid,
+          a.indrelid,
+          sum(b.stawidth + 1) + 9 AS keywidth
+   FROM pg_index a,
+        pg_statistic b
+   WHERE a.indrelid = b.starelid
+     AND arraycontains(string_to_array(a.indkey::text, ' '), array[b.staattnum::text])
+   GROUP BY a.indexrelid,
+            a.indrelid) b,
+     pg_stat_all_tables c
+WHERE a.oid = b.indexrelid
+  AND b.indrelid = c.relid
+  AND round((a.relpages * 8192 * 1.0) / (ceil(b.keywidth * 1.0 * c.n_live_tup / 7373) * 8192 + 8192), 0) > 2;
+test=# do $$
+begin
+loop
+  insert into mydbstat select clock_timestamp(), * from pg_stat_database where datname = current_database();
+  commit;
+  delete from mydbstat where ctime <= clock_timestamp() - '5 seconds'::interval;
+  commit;
+  perform pg_sleep(3);
+end loop;
+end;
+$$;
+test=# select * from (select ctime,numbackends,
+xact_commit - lag(xact_commit) over (order by ctime),
+tup_inserted - lag(tup_inserted) over (order by ctime), 
+tup_updated - lag(p_updated) over (order by ctime) from mydbstat) a order by ctime desc limit 1;
