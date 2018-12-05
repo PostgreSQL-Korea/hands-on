@@ -56,6 +56,7 @@ FROM pg_class a,
 WHERE a.oid = b.indexrelid
   AND b.indrelid = c.relid
   AND round((a.relpages * 8192 * 1.0) / (ceil(b.keywidth * 1.0 * c.n_live_tup / 7373) * 8192 + 8192), 0) > 2;
+test=# create unlogged mydbstat as select clock_timestamp(), * from pg_stat_database where datname = current_database();
 test=# do $$
 begin
 loop
